@@ -23,11 +23,16 @@ pg.display.set_caption("Tower Defense")
 
 #game mi variables
 placing_turrets = False #o esnada turret konumlandırıyor olup olmadığımıza bakan variable.
+selected_turret = None
 
 
 #load images
 map_image =   pg.image.load("levels/level_map.png").convert_alpha() 
 enemy_image = pg.image.load('assets/enemies/enemy_1.png').convert_alpha() #bunun amacı enemy oluşturduğumuz zaman ekrana vereceğimiz image'ı koda tanıtmak
+
+#cursor spritesheetlerini indiriyorum
+turret_sheet = pg.image.load("assets/turrets/turret_1.png").convert_alpha()
+
 cursor_turret = pg.image.load("assets/turrets/cursor_turret.png").convert_alpha() #bu kodla turret koyacağımız zamanki cursor image'ı programa ekledik
 
 #düğmelerin görsellerini eklerken error vermemesi için tutorialdakinden biraz daha farklı bir kod kullanıcam burada
@@ -61,8 +66,19 @@ def create_turret(mouse_pos):
              if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
                   space_is_free = False
         if space_is_free == True:
-            new_turret = Turret(cursor_turret, mouse_tile_x, mouse_tile_y) #burada new_turret dedim çok fazla turret'lı değişken vardı çünkü
+            new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y) #burada new_turret dedim çok fazla turret'lı değişken vardı çünkü
             turret_group.add(new_turret)
+
+def select_turret(mouse_pos): #şimdi bu function ile bir turret'a tıklayınca menzilini gösteriyor artık
+    mouse_tile_x = mouse_pos[0] // 64
+    mouse_tile_y = mouse_pos[1] // 64
+    for turret in turret_group:
+        if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
+            return turret
+
+def clear_section(): #bununla da o turret tıklamasını geri alıyoruz
+    for turret in turret_group:
+        turret.selected = False
 
 #burada group üretiyoruz enemyler ve turretler için
 enemy_group = pg.sprite.Group()
@@ -102,6 +118,12 @@ while run:  #as long as the run variable is true, the code will keep executing i
         placing_turrets = True #artık printlemiyoruz turret yerleştirme değişkenini true yapıyoruz.
     #if placing turrets, then show cancel button as well. cancel yalnızca turret placelemeye çalışırken belirmesi gereken bir buton.
     if placing_turrets == True:
+        #cursor'da turret gözüksün diye bu
+        cursor_rect = cursor_turret.get_rect()
+        cursor_pos = pg.mouse.get_pos()
+        cursor_rect.center = cursor_pos
+        if cursor_pos[0] <= 960:
+            screen.blit(cursor_turret, cursor_rect)
         if cancel_button.draw(screen):
             placing_turrets = False #artık printlemiyoruz, değişkenimizi false yapıyoruz.
     #sondaki printler butona basma durumumuza göre programa bir şeyler yaptırma işini becerdik mi kontrol etmek için. doğru çalışırsa terminale basmalı
@@ -110,6 +132,12 @@ while run:  #as long as the run variable is true, the code will keep executing i
 
     #artık bütün düşmanları hareket ettirecek method ile hareketi sağlayabiliriz ^_^
     enemy_group.update()
+    turret_group.update(enemy_group)
+    for turret in turret_group: #yenilenmiş turret çizme komutu (bunu silmeyin range çalışmıyor NEDEN ÇALIŞMIYOR BİLMİYORUM SİLMEYİN İŞTE (╥﹏╥))
+        turret.draw(screen)
+
+    if selected_turret:
+        selected_turret.selected = True
     
     #enemyleri ekrana yansıtıyoruz burada artık :3
     enemy_group.draw(screen)
@@ -125,7 +153,13 @@ while run:  #as long as the run variable is true, the code will keep executing i
             mouse_pos = pg.mouse.get_pos()
             #turret koyduğumuz yer oyun ekranının içinde mi onu kontrol ediyor, içindeyse turret yerleştiriyor ^w^
             if mouse_pos[0]<960 and mouse_pos[1]<960:
-                    create_turret(mouse_pos)
+                    #seçilen turret'tan çıkıyoruz
+                    selected_turret = None
+                    clear_section()
+                    if placing_turrets == True: #bunun sayesinde artık place turret tuşuna basmadan turret yerleştiremiyoruz
+                        create_turret(mouse_pos)
+                    else:
+                        selected_turret = select_turret(mouse_pos)
             
 
     pg.display.flip() #güncellemeleri ekranda gösteriyoruz  
