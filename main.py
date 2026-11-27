@@ -30,8 +30,12 @@ selected_turret = None
 map_image =   pg.image.load("levels/level_map.png").convert_alpha() 
 enemy_image = pg.image.load('assets/enemies/enemy_1.png').convert_alpha() #bunun amacı enemy oluşturduğumuz zaman ekrana vereceğimiz image'ı koda tanıtmak
 
-#cursor spritesheetlerini indiriyorum
-turret_sheet = pg.image.load("assets/turrets/turret_1.png").convert_alpha()
+#şimdi farklı seviyelerdeki turretların farklı gözükmesini sağlayacağız
+turret_spritesheets = []
+for x in range(1,5):
+    #cursor spritesheetlerini indiriyorum
+    turret_sheet = pg.image.load(f"assets/turrets/turret_{x}.png").convert_alpha()
+    turret_spritesheets.append(turret_sheet) #böylece farklı seviye turret spritesheetlerin olduğu bi liste yaptık
 
 cursor_turret = pg.image.load("assets/turrets/cursor_turret.png").convert_alpha() #bu kodla turret koyacağımız zamanki cursor image'ı programa ekledik
 
@@ -40,8 +44,11 @@ cursor_turret = pg.image.load("assets/turrets/cursor_turret.png").convert_alpha(
 script_dir = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(script_dir, "assets", "buttons", "buy_turret.png")
 other_image_path = os.path.join(script_dir, "assets", "buttons", "cancel.png")
+third_image_path = os.path.join(script_dir, "assets", "buttons", "upgrade_turret.png")
 buy_turret_image = pg.image.load(image_path).convert_alpha()
 cancel_image = pg.image.load(other_image_path).convert_alpha()
+#ŞİMDİ DE UPGRADE İÇİN BUTON AYARLAMAM LAZIMOOOOFFFFFF
+upgrade_turret_image = pg.image.load(third_image_path).convert_alpha()
 
 
 #load json data for level UwU
@@ -65,8 +72,8 @@ def create_turret(mouse_pos):
         for turret in turret_group:
              if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
                   space_is_free = False
-        if space_is_free == True:
-            new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y) #burada new_turret dedim çok fazla turret'lı değişken vardı çünkü
+        if space_is_free == True: #artık turret için koyduğumuz resim argümanı turret spritesheet listesinin kendisi olmalı
+            new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y) #burada new_turret dedim çok fazla turret'lı değişken vardı çünkü
             turret_group.add(new_turret)
 
 def select_turret(mouse_pos): #şimdi bu function ile bir turret'a tıklayınca menzilini gösteriyor artık
@@ -87,6 +94,7 @@ turret_group = pg.sprite.Group()
 #şimdi oyunumuzun içerisinde oluşturuyoruz button'ları ^v^
 turret_button = Button(960+30, 120, buy_turret_image, True) #bu kısım tutorialdan birazcik farklı, direkt png
 cancel_button = Button(960+50, 180, cancel_image, True) #dosyasının adını verince kodumuz nedense tanımıyor çünkü </3
+upgrade_button = Button(960+30, 240, upgrade_turret_image, True) #saat sabahın ALTISI
 #class'ımıza tek tıklanabilme argümanı eklemiştik. instance'larımızı da güncelledik.
 
 
@@ -127,6 +135,12 @@ while run:  #as long as the run variable is true, the code will keep executing i
         if cancel_button.draw(screen):
             placing_turrets = False #artık printlemiyoruz, değişkenimizi false yapıyoruz.
     #sondaki printler butona basma durumumuza göre programa bir şeyler yaptırma işini becerdik mi kontrol etmek için. doğru çalışırsa terminale basmalı
+    #şimdi. upgrade butonu ancak bir turret seçildiyse ekrana gelmeli
+    if selected_turret:
+        #if selected turret can be upgraded then show the upgrade button
+        if selected_turret.upgrade_level < 4:
+            if upgrade_button.draw(screen): #bir input alabilmek için if bloğu koyuyoruz ig-
+                selected_turret.upgrade()
 
     #enemy'nin takip edeceği yolu artık ekrana çizmemiz gerekmediği için sildim :pp
 
