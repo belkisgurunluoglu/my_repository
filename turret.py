@@ -1,11 +1,13 @@
 import pygame as pg
 import math
+from turret_data import TURRET_DATA
 
 class Turret(pg.sprite.Sprite):
-    def __init__(self, sprite_sheet, tile_x, tile_y):
+    def __init__(self, sprite_sheets, tile_x, tile_y): #classımızı da multiple spritesheetli yapıyoruz burada
         pg.sprite.Sprite.__init__(self)
-        self.range = 200 #turret'ın menzili bu da
-        self.cooldown = 1500 #turret animasyonu için cooldown ekliyorum
+        self.upgrade_level = 1 #level değişkeni tanımladık, ilk spawnladığımızda lv 1 atadık.
+        self.range = TURRET_DATA[self.upgrade_level - 1].get("range") #artık corresponding turret levelin menzili olmalı
+        self.cooldown = TURRET_DATA[self.upgrade_level - 1].get("cooldown") #gene aynı şekilde
         self.last_shot = pg.time.get_ticks()
         self.selected = False
         self.target = None
@@ -17,8 +19,8 @@ class Turret(pg.sprite.Sprite):
         self.y = (self.tile_y * 64) + 32
 
         #animasyonun büyüsü burada oluyor
-        self.sprite_sheet = sprite_sheet
-        self.animation_list = self.load_images()
+        self.sprite_sheets = sprite_sheets
+        self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1]) #artık buna argüman vermemiz lazım, boş bırakamayız. 
         self.frame_index = 0
         self.update_time = pg.time.get_ticks()
 
@@ -39,12 +41,12 @@ class Turret(pg.sprite.Sprite):
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
 
-    def load_images(self):
+    def load_images(self, sprite_sheet): 
         #sprite sheet'ten frameleri çıkartan komut bloğu
-        size = self.sprite_sheet.get_height()
+        size = sprite_sheet.get_height() #sprite_sheets bir liste, onun size'ını alamayız. iteratelenecek(?) argüman olarak vericez :D
         animation_list = []
         for x in range(8):
-            temp_image = self.sprite_sheet.subsurface(x * size, 0, size, size)
+            temp_image = sprite_sheet.subsurface(x * size, 0, size, size)
             animation_list.append(temp_image)
         return animation_list
 
@@ -54,7 +56,7 @@ class Turret(pg.sprite.Sprite):
             self.play_animation()
         else:
             #cooldown bittiği zaman yeni hedef arasın
-            if pg.time.get_ticks() - self.last_shot > self.cooldown:
+            if pg.time.get_ticks() - int(self.last_shot) > int(self.cooldown):
                 self.pick_target(enemy_group)
 
     def pick_target(self, enemy_group):
@@ -68,7 +70,6 @@ class Turret(pg.sprite.Sprite):
             dist = (x_dist ** 2 + y_dist ** 2) ** 0.5
             if dist <= self.range:
                 self.target = enemy
-                print("enemy found")
                 self.angle = math.degrees(math.atan2(-y_dist, x_dist)) #math komutlarının iğrençlik ya, ama artık her ateş ettiğinde nişan alıp ateş ediyor
 
 
@@ -83,6 +84,22 @@ class Turret(pg.sprite.Sprite):
                 self.frame_index = 0 #hoca sonsuz döngüde >~<
                 self.last_shot = pg.time.get_ticks()
                 self.target = None
+
+    def upgrade(self):
+        self.upgrade_level += 1
+        self.range = TURRET_DATA[self.upgrade_level - 1].get("range") #değerlerimizi güncellemiş olduk yeni levele göre
+        self.cooldown = TURRET_DATA[self.upgrade_level - 1].get("cooldown") 
+        #şimdi turret görsellerimizi de yükseltiyoruz.
+        self.animation_list = self.load_images(self.sprite_sheets[self.upgrade_level - 1])
+        self.original_image = self.animation_list[self.frame_index]
+        #şimdi de range dairemizi güncelliyoruz. shoutout to egemen-chan for readable code
+        self.range_image = pg.Surface((self.range * 2, self.range *2))
+        self.range_image.fill((0, 0, 0))
+        self.range_image.set_colorkey((0, 0, 0))
+        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
+        self.range_image.set_alpha(100)
+        self.range_rect = self.range_image.get_rect()
+        self.range_rect.center = self.rect.center
 
     def draw(self, surface):
         self.image = pg.transform.rotate(self.original_image, self.angle - 90)
