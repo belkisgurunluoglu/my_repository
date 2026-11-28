@@ -2,15 +2,16 @@ import pygame as pg
 from pygame.math import Vector2 #bu modülü, enemy'mizin çizgileri takip etmesini yazmayı kolaylaştırmak için importladık.
 import math # bu modülü enemy'i rotatelemek için importladık. 
 class Enemy(pg.sprite.Sprite): #burada enemy class'ımızı tanımlıyoruz, ayrıca enemy'lerin sprite sayılması için pygame'in sprite class'ından inheritance da aldık
-    def __init__(self, waypoints, image): #normalde pos variable'ı bekliyordu bu class, waypoints kullanabilmek için içini güncelledik.
+    def __init__(self, enemy_type, waypoints, images): #normalde pos variable'ı bekliyordu bu class, waypoints kullanabilmek için içini güncelledik.
         pg.sprite.Sprite.__init__(self)
         self.waypoints = waypoints
         self.pos = Vector2(self.waypoints[0]) #waypoints'i pos variable'ımızı extractlemek için kullanıyoruz.
         #en baştaki initial position'umuzu, waypoints listesinin ilk elemanı yaptık ki hareketine çizginin başından başlasın.
         self.target_waypoint = 1 #hedef waypoint'imizin waypoints listesi içerisindeki indexi olacak bu sayı :D
+        self.health = 10
         self.speed = 2 #ileride farklı enemy türleri için farklı farklı hızlar yapacağımız bir speed variable'ı ekledik.
         self.angle = 0 
-        self.original_image = image #aynı görseli tekrar tekrar rotateleyince görüntü kalitesi düşmesin diye tanımladık bunu.
+        self.original_image = images.get(enemy_type) #aynı görseli tekrar tekrar rotateleyince görüntü kalitesi düşmesin diye tanımladık bunu.
         self.image = pg.transform.rotate(self.original_image , self.angle) #image'i o anki angle'a göre rotatelemiş olduk.
         self.rect = self.image.get_rect()
         self.rect.center = self.pos 
