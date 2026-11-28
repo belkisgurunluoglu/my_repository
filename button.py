@@ -3,6 +3,8 @@ import pygame as pg
 #olarak yazmak istiyoruz. 
 #ilk başta single click yapıcaz hepsini (şu anda biraz daha garip bir şey. maindeki print testini çalıştırınca sonsuza kadar çalışıyordu)
 #sonra basılı tutarak tıklama özelliğini de eklicez.
+
+#fgjfjgfhj
 class Button():
   def __init__(self, x, y, image, single_click):
     self.image = image
