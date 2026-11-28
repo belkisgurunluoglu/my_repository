@@ -28,6 +28,12 @@ selected_turret = None
 
 #load images
 map_image =   pg.image.load("levels/level_map.png").convert_alpha() 
+enemy_images = {
+    "weak" : pg.image.load('assets/enemies/enemy_1.png').convert_alpha()
+    "medium" : pg.image.load('assets/enemies/enemy_2.png').convert_alpha()
+    "strong" : pg.image.load('assets/enemies/enemy_3.png').convert_alpha()
+    "elite" : pg.image.load('assets/enemies/enemy_4.png').convert_alpha()}
+
 enemy_image = pg.image.load('assets/enemies/enemy_1.png').convert_alpha() #bunun amacı enemy oluşturduğumuz zaman ekrana vereceğimiz image'ı koda tanıtmak
 
 #şimdi farklı seviyelerdeki turretların farklı gözükmesini sağlayacağız
@@ -100,7 +106,8 @@ upgrade_button = Button(960+30, 240, upgrade_turret_image, True) #saat sabahın 
 
 
 #şimdi artık enemy'lerimizin oluşturduğumuz waypoint'leri takip etmelerini sağlamamız lazım.
-enemy = Enemy(world.waypoints, enemy_image) #manuel olarak yazdığımız koordinatı waypoint'le değiştiriyoruz bunun için.
+enemy_type = "weak"
+enemy = Enemy(enemy_type, world.waypoints, enemy_images) #manuel olarak yazdığımız koordinatı waypoint'le değiştiriyoruz bunun için.
 enemy_group.add(enemy)
 
 print(enemy)
