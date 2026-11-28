@@ -5,7 +5,7 @@ from enemies import Enemy
 from world import World
 from button import Button
 import os
-
+#deneme bir ki
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
