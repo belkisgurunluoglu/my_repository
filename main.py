@@ -64,6 +64,7 @@ with open("levels/level.tmj") as file:
 #create world ^-^
 world = World(world_data , map_image)
 world.process_data()
+world.process_enemies
 
 #esasında bu fonksiyon ile oyunumuzun tile game olmasını sağlıyoruz
 #Turret class'ının özelliklerini de kullanarak turret'ların istediğimiz her yere değil her 64 pixele bir koyulmasını sağlıyoruz
