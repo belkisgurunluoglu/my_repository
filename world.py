@@ -33,7 +33,8 @@ class World():
     enemies = ENEMY_SPAWN_DATA[self.level - 1]
     for enemy_type in enemies:
       enemies_to_spawn = enemies[enemy_type]
-      print(enemies_to_spawn)
+      for enemy in range(enemies_to_spawn)
+      print(enemy_type)
     
   def draw(self, surface):
     surface.blit(self.image, (0,0))
